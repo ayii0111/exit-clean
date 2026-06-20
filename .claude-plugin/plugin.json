@@ -1,0 +1,8 @@
+{
+  "name": "exit-clean",
+  "description": "Leave the current Claude Code session and permanently delete its history file.",
+  "version": "1.0.0",
+  "author": {
+    "name": "ayii"
+  }
+}
