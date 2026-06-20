@@ -21,13 +21,13 @@ Type `/exit-clean` → prompted with `⚠️ 確定要離開並刪除此 session
 One-liner (requires the repo to be on GitHub):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/<user>/exit-clean/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ayii0111/exit-clean/main/install.sh | bash
 ```
 
 Or clone manually:
 
 ```bash
-git clone https://github.com/<user>/exit-clean.git
+git clone https://github.com/ayii0111/exit-clean.git
 cd exit-clean
 bash install.sh
 ```
@@ -37,11 +37,11 @@ Restart Claude Code. The `/exit-clean` command will be available in every sessio
 ## Uninstall
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/<user>/exit-clean/main/uninstall.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ayii0111/exit-clean/main/uninstall.sh | bash
 ```
 
 ## Migrating to a new machine
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/<user>/exit-clean/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ayii0111/exit-clean/main/install.sh | bash
 ```
