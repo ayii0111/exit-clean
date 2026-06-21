@@ -1,40 +1,18 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
+NAME="exit-clean"
+# 本機執行：用本地路徑
+if [ -f "$(dirname "$0")/.claude-plugin/plugin.json" ]; then
+  DIR="$(cd "$(dirname "$0")" && pwd)"
+  claude plugin marketplace add "$DIR"
+else
+  # curl | bash：用 GitHub source
+  claude plugin marketplace add "ayii0111/$NAME"
+fi
+claude plugin install "${NAME}@${NAME}"
 
-REPO="$(cd "$(dirname "$0")" && pwd)"
-CLAUDE_DIR="$HOME/.claude"
+CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+mkdir -p "$CLAUDE_DIR/commands"
+printf -- '---\ndisable-model-invocation: true\n---\n' > "$CLAUDE_DIR/commands/exit-clean.md"
 
-mkdir -p "$CLAUDE_DIR/commands" "$CLAUDE_DIR/hooks"
-
-cp "$REPO/commands/exit-clean.md"       "$CLAUDE_DIR/commands/exit-clean.md"
-cp "$REPO/hooks/exit-clean.sh"          "$CLAUDE_DIR/hooks/exit-clean.sh"
-cp "$REPO/hooks/exit-clean-confirm.sh"  "$CLAUDE_DIR/hooks/exit-clean-confirm.sh"
-chmod +x "$CLAUDE_DIR/hooks/exit-clean.sh" "$CLAUDE_DIR/hooks/exit-clean-confirm.sh"
-
-python3 << 'EOF'
-import json, os
-
-path = os.path.expanduser("~/.claude/settings.json")
-s = json.load(open(path)) if os.path.exists(path) else {}
-hooks = s.setdefault("hooks", {})
-
-exp = hooks.setdefault("UserPromptExpansion", [])
-exp[:] = [e for e in exp if e.get("matcher") != "exit-clean"]
-exp.insert(0, {
-    "matcher": "exit-clean",
-    "hooks": [{"type": "command", "command": "bash ~/.claude/hooks/exit-clean.sh", "timeout": 300}]
-})
-
-sub = hooks.setdefault("UserPromptSubmit", [])
-if not any("exit-clean-confirm" in h.get("command", "") for e in sub for h in e.get("hooks", [])):
-    sub.insert(0, {
-        "matcher": "",
-        "hooks": [{"type": "command", "command": "bash ~/.claude/hooks/exit-clean-confirm.sh"}]
-    })
-
-with open(path, "w") as f:
-    json.dump(s, f, indent=2, ensure_ascii=False)
-    f.write("\n")
-EOF
-
-echo "✓ 安裝完成，重新開啟 Claude Code 後 /exit-clean 即可使用。"
+echo "✓ 安裝完成。在 CC 執行 /reload-plugins 或重啟 CC 套用。"

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "exit-clean",
+  "description": "A Claude Code plugin to leave a session and permanently delete its history file.",
+  "owner": {
+    "name": "ayii"
+  },
+  "plugins": [
+    {
+      "name": "exit-clean",
+      "description": "Leave the current session and permanently delete its history file.",
+      "author": {
+        "name": "ayii"
+      },
+      "category": "productivity",
+      "source": "./"
+    }
+  ]
+}
