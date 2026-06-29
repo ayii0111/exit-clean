@@ -28,8 +28,16 @@ case "$ANS" in
       p=$(ps -o ppid= -p "$p" 2>/dev/null | tr -d ' ')
     done
     [ -z "$CC_PID" ] && block '"找不到 CC 主程序，已取消"'
-    SESSION_FILE="$(find "$HOME/.claude/projects" -name "${SID}.jsonl" 2>/dev/null | head -1)"
-    [ -z "$SESSION_FILE" ] && block '"找不到 session 檔，已取消"'
+    # 只刪「當前專案目錄」對應的 session：用 cwd 算出 slug 直指該目錄，
+    # 避免同 session id 被複製到他處時，find 誤刪到別的副本。
+    SLUG=$(printf '%s' "$PWD" | sed 's/[^a-zA-Z0-9]/-/g')
+    SESSION_FILE="$HOME/.claude/projects/$SLUG/${SID}.jsonl"
+    # debug 稽核：每次確認刪除都留一行，方便日後核對是否刪對檔案
+    LOG="$HOME/.claude/exit-clean.log"
+    printf '%s arm-delete sid=%s pwd=%s slug=%s file=%s exists=%s cc_pid=%s\n' \
+      "$(date '+%F %T')" "$SID" "$PWD" "$SLUG" "$SESSION_FILE" \
+      "$([ -f "$SESSION_FILE" ] && echo Y || echo N)" "$CC_PID" >> "$LOG"
+    [ -f "$SESSION_FILE" ] || block '"當前專案目錄下找不到此 session 檔，已取消"'
     /usr/bin/perl -e '
       use POSIX qw(setsid);
       my ($cc,$f) = @ARGV;
@@ -39,6 +47,10 @@ case "$ANS" in
       while (kill(0, $cc)) { select(undef,undef,undef,0.2); last if ++$n > 3000; }
       select(undef,undef,undef,0.5);
       unlink $f;
+      if (open my $lg, ">>", "$ENV{HOME}/.claude/exit-clean.log") {
+        print $lg POSIX::strftime("%Y-%m-%d %H:%M:%S", localtime),
+                  " post-delete file=$f gone=", ((-e $f) ? 0 : 1), "\n";
+      }
     ' "$CC_PID" "$SESSION_FILE" >/dev/null 2>&1
     kill "$CC_PID"
     block '"已離開並刪除 session"'
